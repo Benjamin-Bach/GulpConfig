@@ -2,13 +2,14 @@ const
   gulp  = require('gulp'),
   plugins = require('gulp-load-plugins')(),
   syncOpts = {
-    proxy       : 'dev.lourse',
+    proxy       : 'dev.afept',
     files       : [
       '../../pages/**/*',
       'css/*',
       'js/*',
       'templates/**/*'
     ],
+    watchEvents : ['add', 'change', 'unlink', 'addDir', 'unlinkDir'],
     open        : false,
     notify      : false,
     ghostMode   : false,
@@ -17,7 +18,7 @@ const
     }
   }
 ;
-
+console.log(plugins);
 var browsersync = false;
 
 
