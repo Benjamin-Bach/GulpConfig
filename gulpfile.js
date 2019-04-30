@@ -25,10 +25,10 @@ var browsersync = false;
 gulp.task('css-prod', () => {
   return gulp.src('./src/scss/*.scss')
   .pipe(plugins.sass())
+  .pipe(plugins.groupCssMediaQueries())
   .pipe(plugins.autoprefixer({
     browsers: ['last 2 versions', '> 2%']
   }))
-  .pipe(plugins.cssbeautify({indent: '  '}))
   .pipe(gulp.dest('./css/'));
 });
 
