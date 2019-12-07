@@ -1,13 +1,11 @@
 const
   gulp  = require('gulp'),
+  del = require('del'),
   plugins = require('gulp-load-plugins')(),
   syncOpts = {
-    proxy       : 'dev.afept',
+    proxy       : 'dev.drama',
     files       : [
-      '../../pages/**/*',
-      'css/*',
-      'js/*',
-      'templates/**/*'
+      'build/**/*'
     ],
     watchEvents : ['add', 'change', 'unlink', 'addDir', 'unlinkDir'],
     open        : false,
@@ -18,26 +16,27 @@ const
     }
   }
 ;
-console.log(plugins);
 var browsersync = false;
+console.log(plugins);
 
 
 gulp.task('css-prod', () => {
-  return gulp.src('./src/scss/*.scss')
+  return gulp.src('./src/scss/app.scss')
   .pipe(plugins.sass())
   .pipe(plugins.groupCssMediaQueries())
   .pipe(plugins.autoprefixer({
-    browsers: ['last 2 versions', '> 2%']
+    overrideBrowserslist: ['last 2 versions', '> 2%']
   }))
-  .pipe(gulp.dest('./css/'));
+  .pipe(plugins.cssnano())
+  .pipe(gulp.dest('./build/assets/css/'));
 });
 
 gulp.task('css-dev', () => {
-  return gulp.src('./src/scss/*.scss')
+  return gulp.src('./src/scss/app.scss')
   .pipe(plugins.sourcemaps.init())
   .pipe(plugins.sass())
   .pipe(plugins.sourcemaps.write('.'))
-  .pipe(gulp.dest('./css/'))
+  .pipe(gulp.dest('./build/assets/css/'))
 });
 
 gulp.task('js-prod', () => {
@@ -52,7 +51,7 @@ gulp.task('js-prod', () => {
       drop_console: true
     }
   }))
-  .pipe(gulp.dest('./js/'));
+  .pipe(gulp.dest('./build/assets/js/'));
 });
 
 gulp.task('js-dev', () => {
@@ -62,7 +61,7 @@ gulp.task('js-dev', () => {
   .pipe(plugins.babel({
 			presets: ['@babel/env']
 		}))
-  .pipe(gulp.dest('./js/'));
+  .pipe(gulp.dest('./build/assets/js/'));
 });
 
 gulp.task('browsersync', () => {
@@ -70,6 +69,19 @@ gulp.task('browsersync', () => {
     browsersync = require('browser-sync').create();
     browsersync.init(syncOpts);
   }
+});
+
+gulp.task('php', () => {
+  return gulp.src('./src/templates/*.php')
+  .pipe(plugins.php2html())
+  .pipe(plugins.beautify.html({ indent_size: 2 }))
+  .pipe(gulp.dest('./build'))
+});
+
+gulp.task('clean', () => {
+  return del([
+    './build/**/*'
+  ])
 });
 
 gulp.task('watch:css', () => {
@@ -80,6 +92,10 @@ gulp.task('watch:js', () => {
   gulp.watch('./src/js/*.js', gulp.series('js-dev'));
 });
 
-gulp.task('watch', gulp.parallel('watch:css', 'watch:js'));
-gulp.task('build', gulp.parallel('css-prod','js-prod'));
+gulp.task('watch:php', () => {
+  gulp.watch('./src/templates/*.php', gulp.series('php'));
+});
+
+gulp.task('watch', gulp.parallel('watch:css', 'watch:js', 'watch:php'));
+gulp.task('build', gulp.series('clean','php','css-prod','js-prod'));
 gulp.task('default', gulp.parallel('browsersync','watch'));
