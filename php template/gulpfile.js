@@ -5,7 +5,8 @@ const
   syncOpts = {
     proxy       : 'dev.drama',
     files       : [
-      'build/**/*'
+      'dist/**/*',
+      'src/data.php'
     ],
     watchEvents : ['add', 'change', 'unlink', 'addDir', 'unlinkDir'],
     open        : false,
@@ -28,7 +29,7 @@ gulp.task('css-prod', () => {
     overrideBrowserslist: ['last 2 versions', '> 2%']
   }))
   .pipe(plugins.cssnano())
-  .pipe(gulp.dest('./build/assets/css/'));
+  .pipe(gulp.dest('./dist/assets/css/'));
 });
 
 gulp.task('css-dev', () => {
@@ -36,7 +37,7 @@ gulp.task('css-dev', () => {
   .pipe(plugins.sourcemaps.init())
   .pipe(plugins.sass())
   .pipe(plugins.sourcemaps.write('.'))
-  .pipe(gulp.dest('./build/assets/css/'))
+  .pipe(gulp.dest('./dist/assets/css/'))
 });
 
 gulp.task('js-prod', () => {
@@ -51,7 +52,7 @@ gulp.task('js-prod', () => {
       drop_console: true
     }
   }))
-  .pipe(gulp.dest('./build/assets/js/'));
+  .pipe(gulp.dest('./dist/assets/js/'));
 });
 
 gulp.task('js-dev', () => {
@@ -61,7 +62,7 @@ gulp.task('js-dev', () => {
   .pipe(plugins.babel({
 			presets: ['@babel/env']
 		}))
-  .pipe(gulp.dest('./build/assets/js/'));
+  .pipe(gulp.dest('./dist/assets/js/'));
 });
 
 gulp.task('browsersync', () => {
@@ -75,17 +76,23 @@ gulp.task('php', () => {
   return gulp.src('./src/templates/*.php')
   .pipe(plugins.php2html())
   .pipe(plugins.beautify.html({ indent_size: 2 }))
-  .pipe(gulp.dest('./build'))
+  .pipe(gulp.dest('./dist'))
+});
+
+gulp.task('imgs', () => {
+  return gulp.src('./src/imgs/*')
+  .pipe(gulp.dest('./dist/assets/imgs/'))
 });
 
 gulp.task('clean', () => {
   return del([
-    './build/**/*'
+    './dist/*.html',
+    './dist/assets/**/*'
   ])
 });
 
 gulp.task('watch:css', () => {
-  gulp.watch('./src/scss/*.scss', gulp.series('css-dev'));
+  gulp.watch('./src/scss/*.scss', gulp.series('css-dev', 'imgs'));
 });
 
 gulp.task('watch:js', () => {
@@ -97,5 +104,5 @@ gulp.task('watch:php', () => {
 });
 
 gulp.task('watch', gulp.parallel('watch:css', 'watch:js', 'watch:php'));
-gulp.task('build', gulp.series('clean','php','css-prod','js-prod'));
+gulp.task('build', gulp.series('clean','php','imgs','css-prod','js-prod'));
 gulp.task('default', gulp.parallel('browsersync','watch'));

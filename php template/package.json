@@ -1,7 +1,7 @@
 {
-  "name": "gravthemetools",
+  "name": "gulpthemetools",
   "version": "1.0.0",
-  "description": "Tools around gulp for grav theming",
+  "description": "Tools around gulp for agnostic php theming",
   "main": "gulpfile.js",
   "devDependencies": {
     "@babel/core": "^7.2.2",
